@@ -1,3 +1,5 @@
+const fs = require('fs');
+const bluebird = require('bluebird');
 const dbFile = './.data/entries.db';
 const dbFileExists = fs.existsSync(dbFile);
 const sqlite3 = require('sqlite3').verbose();
