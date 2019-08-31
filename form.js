@@ -54,7 +54,15 @@ module.exports = {
       });
     })
   },
-
+  
+  getEntries() {
+    return new bluebird((resolve, reject) => {
+      db.all(`SELECT * from entries`, function(err, rows) {
+        resolve(rows);
+      });
+    })
+  },
+  
   clear(callback) {
     db.serialize(() => {
       db.run(
