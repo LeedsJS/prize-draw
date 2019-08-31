@@ -138,9 +138,7 @@ app.get('/admin/setup', (req, res) => {
     return res.redirect('/admin/login');
   }
   
-  axios.get('https://leedsjs.com/automation/next-event.json').then((response) => {
-    prizes = response.data.prizes || [];
-    fs.writeFileSync(prizesFile, JSON.stringify(prizes));
+  setupPrizes().then(() => {
     res.end('<p>System has been set up. <a href="/admin">Return to admin</a></p>');
   })
 });
@@ -152,9 +150,7 @@ app.post(`/admin/clear/${process.env.CLEAR_ENDPOINT}`, (req, res) => {
 });
 
 app.post(`/admin/setup/${process.env.SETUP_ENDPOINT}`, (req, res) => {
-  axios.get('https://leedsjs.com/automation/next-event.json').then((response) => {
-    prizes = response.data.prizes || [];
-    fs.writeFileSync(prizesFile, JSON.stringify(prizes));
+  setupPrizes().then(() => {
     res.end('Setup successful');
   })
 });
@@ -163,3 +159,11 @@ app.post(`/admin/setup/${process.env.SETUP_ENDPOINT}`, (req, res) => {
 var listener = app.listen(process.env.PORT, () => {
   console.log('Your app is listening on port ' + listener.address().port);
 });
+
+function setupPrizes() {
+  return axios.get('https://leedsjs.com/automation/next-event.json').then((response) => {
+    prizes = response.data.prizes || [];
+    fs.writeFileSync(prizesFile, JSON.stringify(prizes));
+    return
+  })
+}
