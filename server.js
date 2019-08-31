@@ -58,6 +58,16 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'views/admin-home.html'));  
 });
 
+app.get('/admin/entries', (req, res) => {
+  if (!req.session.admin) {
+    return res.redirect('/admin/login');
+  }
+  
+  form.getEntries().then((entries) => {
+    res.json(entries);
+  })  
+});
+
 app.get('/admin/winners', (req, res) => {
   if (!req.session.admin) {
     return res.redirect('/admin/login');
@@ -113,17 +123,39 @@ app.post('/admin/login', (req, res) => {
   res.end();
 });
 
-app.get('/admin/setup', (req, res) => {
+app.get('/admin/clear', (req, res) => {
   if (!req.session.admin) {
     return res.redirect('/admin/login');
   }
   
   form.clear(() => {
-    axios.get('https://leedsjs.com/automation/next-event.json').then((response) => {
-      prizes = response.data.prizes;
-      fs.writeFileSync(prizesFile, JSON.stringify(prizes));
-      res.end('<p>System has been set up. <a href="/admin">Return to admin</a></p>');
-    })
+    res.end('<p>System has been cleared. <a href="/admin">Return to admin</a></p>');
+  })
+});
+
+app.get('/admin/setup', (req, res) => {
+  if (!req.session.admin) {
+    return res.redirect('/admin/login');
+  }
+  
+  axios.get('https://leedsjs.com/automation/next-event.json').then((response) => {
+    prizes = response.data.prizes || [];
+    fs.writeFileSync(prizesFile, JSON.stringify(prizes));
+    res.end('<p>System has been set up. <a href="/admin">Return to admin</a></p>');
+  })
+});
+
+app.post(`/admin/clear/${process.env.CLEAR_ENDPOINT}`, (req, res) => {
+  form.clear(() => {
+    res.end('Successfully cleared');
+  })
+});
+
+app.post(`/admin/setup/${process.env.SETUP_ENDPOINT}`, (req, res) => {
+  axios.get('https://leedsjs.com/automation/next-event.json').then((response) => {
+    prizes = response.data.prizes || [];
+    fs.writeFileSync(prizesFile, JSON.stringify(prizes));
+    res.end('Setup successful');
   })
 });
 
