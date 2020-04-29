@@ -27,18 +27,18 @@ app.use(
     resave: true,
     saveUninitialized: false,
     store: new SQLiteStore({
-      dir: "./.data"
+      dir: "./.data",
     }),
     cookie: {
-      maxAge: 86400000
-    }
+      maxAge: 86400000,
+    },
   })
 );
 
 app.get("/", (req, res) => {
   req.session.active = true;
 
-  form.insertEntry(req.sessionID, req.query, resultData => {
+  form.insertEntry(req.sessionID, req.query, (resultData) => {
     res.end(`${req.query.c}(${resultData})`);
   });
 });
@@ -65,7 +65,7 @@ app.get("/admin/entries", (req, res) => {
     return res.redirect("/admin/login");
   }
 
-  form.getEntries().then(entries => {
+  form.getEntries().then((entries) => {
     res.json(entries);
   });
 });
@@ -91,7 +91,7 @@ app.get("/admin/winners", (req, res) => {
         queries.push(twitter.getWinners(prize.tweetQuantity));
       }
 
-      return bluebird.all(queries).then(winners => {
+      return bluebird.all(queries).then((winners) => {
         winners = winners.reduce((accumulator, currentValue) => {
           return [...accumulator, ...currentValue];
         }, []);
@@ -100,7 +100,7 @@ app.get("/admin/winners", (req, res) => {
         }</h2><ul><li>${winners.join("</li><li>")}</li></ul>`;
       });
     })
-    .then(prizes => {
+    .then((prizes) => {
       const template = fs
         .readFileSync(path.join(__dirname, "views/admin-winners.html"), "utf8")
         .replace("{{ content }}", prizes.join());
@@ -174,7 +174,7 @@ var listener = app.listen(process.env.PORT, () => {
 function setupPrizes() {
   return axios
     .get("https://leedsjs.com/automation/next-event.json")
-    .then(response => {
+    .then((response) => {
       prizes = response.data.prizes || [];
       fs.writeFileSync(prizesFile, JSON.stringify(prizes));
       return;
